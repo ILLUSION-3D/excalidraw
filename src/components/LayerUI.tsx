@@ -27,7 +27,6 @@ import { ShortcutsDialog } from "./ShortcutsDialog";
 import { LoadingMessage } from "./LoadingMessage";
 import { CLASSES } from "../constants";
 import { shield } from "./icons";
-import { GitHubCorner } from "./GitHubCorner";
 
 import "./LayerUI.scss";
 
@@ -291,15 +290,6 @@ const LayerUI = ({
         />
       )}
       {renderFixedSideContainer()}
-      {
-        <aside
-          className={`layer-ui__wrapper__github-corner zen-mode-transition ${
-            zenModeEnabled && "transition-right"
-          }`}
-        >
-          <GitHubCorner />
-        </aside>
-      }
       {renderFooter()}
     </div>
   );
