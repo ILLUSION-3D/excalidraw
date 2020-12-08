@@ -12,5 +12,6 @@ RUN npm run build:app
 FROM nginx:stable-alpine
 
 COPY --from=build /usr/src/app/build /usr/share/nginx/html
+COPY default.conf /etc/nginx/conf.d/default.conf
 
-HEALTHCHECK CMD wget -q -O /dev/null http://localhost || exit 1
+HEALTHCHECK CMD wget -q -O /dev/null http://localhost:8080 || exit 1
