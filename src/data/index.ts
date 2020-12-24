@@ -29,10 +29,9 @@ const BACKEND_GET = "https://json.excalidraw.com/api/v1/";
 const BACKEND_V2_POST = "https://json.excalidraw.com/api/v2/post/";
 const BACKEND_V2_GET = "https://json.excalidraw.com/api/v2/";
 
-export const SOCKET_SERVER = `https://excalidraw-socket.${window.location.hostname
-  .split(".")
-  .slice(1, 3)
-  .join(".")}`;
+const parts = window.location.hostname.split(".");
+const domain = `${parts[parts.length - 2]}.${parts[parts.length - 1]}`;
+export const SOCKET_SERVER = `https://excalidraw-socket.${domain}`;
 
 export type EncryptedData = {
   data: ArrayBuffer;
