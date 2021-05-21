@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { trackEvent } from "../analytics";
-import { getDefaultAppState } from "../appState";
+// import { getDefaultAppState } from "../appState";
 import { ExcalidrawImperativeAPI } from "../components/App";
 import { ErrorDialog } from "../components/ErrorDialog";
 import { TopErrorBoundary } from "../components/TopErrorBoundary";
@@ -23,7 +23,7 @@ import { loadFromBlob } from "../data/blob";
 import { ImportedDataState } from "../data/types";
 import {
   ExcalidrawElement,
-  NonDeletedExcalidrawElement,
+  // NonDeletedExcalidrawElement,
 } from "../element/types";
 import { useCallbackRefState } from "../hooks/useCallbackRefState";
 import { Language, t } from "../i18n";
@@ -45,7 +45,8 @@ import CollabWrapper, {
   CollabContextConsumer,
 } from "./collab/CollabWrapper";
 import { LanguageList } from "./components/LanguageList";
-import { exportToBackend, getCollaborationLinkData, loadScene } from "./data";
+// import { exportToBackend, getCollaborationLinkData, loadScene } from "./data";
+import { getCollaborationLinkData, loadScene } from "./data";
 import {
   importFromLocalStorage,
   saveToLocalStorage,
@@ -285,31 +286,31 @@ const ExcalidrawWrapper = () => {
     }
   };
 
-  const onExportToBackend = async (
-    exportedElements: readonly NonDeletedExcalidrawElement[],
-    appState: AppState,
-    canvas: HTMLCanvasElement | null,
-  ) => {
-    if (exportedElements.length === 0) {
-      return window.alert(t("alerts.cannotExportEmptyCanvas"));
-    }
-    if (canvas) {
-      try {
-        await exportToBackend(exportedElements, {
-          ...appState,
-          viewBackgroundColor: appState.exportBackground
-            ? appState.viewBackgroundColor
-            : getDefaultAppState().viewBackgroundColor,
-        });
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          const { width, height } = canvas;
-          console.error(error, { width, height });
-          setErrorMessage(error.message);
-        }
-      }
-    }
-  };
+  // const onExportToBackend = async (
+  //   exportedElements: readonly NonDeletedExcalidrawElement[],
+  //   appState: AppState,
+  //   canvas: HTMLCanvasElement | null,
+  // ) => {
+  //   if (exportedElements.length === 0) {
+  //     return window.alert(t("alerts.cannotExportEmptyCanvas"));
+  //   }
+  //   if (canvas) {
+  //     try {
+  //       await exportToBackend(exportedElements, {
+  //         ...appState,
+  //         viewBackgroundColor: appState.exportBackground
+  //           ? appState.viewBackgroundColor
+  //           : getDefaultAppState().viewBackgroundColor,
+  //       });
+  //     } catch (error) {
+  //       if (error.name !== "AbortError") {
+  //         const { width, height } = canvas;
+  //         console.error(error, { width, height });
+  //         setErrorMessage(error.message);
+  //       }
+  //     }
+  //   }
+  // };
 
   const renderTopRightUI = useCallback(
     (isMobile: boolean, appState: AppState) => {
@@ -424,7 +425,7 @@ const ExcalidrawWrapper = () => {
         onCollabButtonClick={collabAPI?.onCollabButtonClick}
         isCollaborating={collabAPI?.isCollaborating()}
         onPointerUpdate={collabAPI?.onPointerUpdate}
-        onExportToBackend={onExportToBackend}
+        // onExportToBackend={onExportToBackend}
         renderTopRightUI={renderTopRightUI}
         renderFooter={renderFooter}
         langCode={langCode}
