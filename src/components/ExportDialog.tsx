@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 import { ActionsManagerInterface } from "../actions/types";
-import { probablySupportsClipboardBlob } from "../clipboard";
+// import { probablySupportsClipboardBlob } from "../clipboard";
 import { canvasToBlob } from "../data/blob";
 import { NonDeletedExcalidrawElement } from "../element/types";
 import { CanvasError } from "../errors";
@@ -12,7 +12,8 @@ import { exportToCanvas, getExportSize } from "../scene/export";
 import { AppState } from "../types";
 import { Dialog } from "./Dialog";
 import "./ExportDialog.scss";
-import { clipboard, exportFile, link } from "./icons";
+// import { clipboard, exportFile, link } from "./icons";
+import { exportFile, link } from "./icons";
 import Stack from "./Stack";
 import { ToolButton } from "./ToolButton";
 
@@ -150,7 +151,7 @@ const ExportModal = ({
               aria-label={t("buttons.exportToSvg")}
               onClick={() => onExportToSvg(exportedElements, scale)}
             />
-            {probablySupportsClipboardBlob && (
+            {/* {probablySupportsClipboardBlob && (
               <ToolButton
                 type="button"
                 icon={clipboard}
@@ -158,7 +159,7 @@ const ExportModal = ({
                 aria-label={t("buttons.copyPngToClipboard")}
                 onClick={() => onExportToClipboard(exportedElements, scale)}
               />
-            )}
+            )} */}
             {onExportToBackend && (
               <ToolButton
                 type="button"
