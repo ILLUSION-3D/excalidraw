@@ -137,8 +137,8 @@ const LibraryMenuItems = ({
   const rows = [];
   let addedPendingElements = false;
 
-  const referrer =
-    libraryReturnUrl || window.location.origin + window.location.pathname;
+  // const referrer =
+  //   libraryReturnUrl || window.location.origin + window.location.pathname;
 
   rows.push(
     <div className="layer-ui__library-header" key="library-header">
@@ -193,14 +193,14 @@ const LibraryMenuItems = ({
           />
         </>
       )}
-      <a
+      {/* <a
         href={`https://libraries.excalidraw.com?target=${
           window.name || "_blank"
         }&referrer=${referrer}&useHash=true&token=${id}`}
         target="_excalidraw_libraries"
       >
         {t("labels.libraries")}
-      </a>
+      </a> */}
     </div>,
   );
 
