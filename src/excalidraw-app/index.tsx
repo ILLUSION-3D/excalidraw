@@ -57,6 +57,7 @@ import { restoreAppState, RestoredDataState } from "../data/restore";
 // import { shield } from "../components/icons";
 
 import "./index.scss";
+import initialData from "./initialData";
 
 const languageDetector = new LanguageDetector();
 languageDetector.init({
@@ -222,10 +223,14 @@ const ExcalidrawWrapper = () => {
               localStorage.getItem(
                 STORAGE_KEYS.LOCAL_STORAGE_LIBRARY,
               ) as string,
-            ) || [];
+            ) || initialData.libraryItems;
         } catch (e) {
           console.error(e);
         }
+      } else {
+        scene = { elements: [], scrollToContent: true };
+        // @ts-ignore-line
+        scene.libraryItems = initialData.libraryItems;
       }
       initialStatePromiseRef.current.promise.resolve(scene);
     });
