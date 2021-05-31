@@ -4,36 +4,47 @@ import { ExcalidrawElement } from "../../element/types";
 import { getSceneVersion } from "../../element";
 import Portal from "../collab/Portal";
 import { restoreElements } from "../../data/restore";
+import KintoClient from "kinto-http";
 
-let firebasePromise: Promise<
-  typeof import("firebase/app").default
-> | null = null;
+let kintoClient: typeof KintoClient | null = null;
 
-const loadFirebase = async () => {
-  const firebase = (
-    await import(/* webpackChunkName: "firebase" */ "firebase/app")
-  ).default;
-  await import(/* webpackChunkName: "firestore" */ "firebase/firestore");
+// https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/btoa
+// https://github.com/MrPropre/base64-u8array-arraybuffer/blob/master/src/index.js
 
-  const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG);
-  firebase.initializeApp(firebaseConfig);
-
-  return firebase;
+const uint8ArrayToBase64 = (typedArray: Uint8Array) => {
+  const string = typedArray.reduce((data, byte) => {
+    return data + String.fromCharCode(byte);
+  }, "");
+  return btoa(string);
 };
 
-const getFirebase = async (): Promise<
-  typeof import("firebase/app").default
-> => {
-  if (!firebasePromise) {
-    firebasePromise = loadFirebase();
+const base64ToUint8Array = (b64: string) =>
+  Uint8Array.from(atob(b64), (char: string) => char.charCodeAt(0));
+
+const loadClient = (): typeof KintoClient => {
+  const url = process.env.REACT_APP_STORE_BACKEND_URL;
+  const client = new KintoClient(url);
+  // @ts-ignore
+  return client;
+};
+
+const getClient = (): typeof KintoClient => {
+  if (!kintoClient) {
+    kintoClient = loadClient();
   }
-  return await firebasePromise!;
+  return kintoClient;
+};
+
+const getStore = () => {
+  const client = getClient();
+  // @ts-ignore
+  return client.bucket("whiteboard").collection("scenes");
 };
 
 interface FirebaseStoredScene {
   sceneVersion: number;
-  iv: firebase.default.firestore.Blob;
-  ciphertext: firebase.default.firestore.Blob;
+  iv: string; // base64
+  ciphertext: string; // base64
 }
 
 const encryptElements = async (
@@ -108,35 +119,43 @@ export const saveToFirebase = async (
     return true;
   }
 
-  const firebase = await getFirebase();
   const sceneVersion = getSceneVersion(elements);
   const { ciphertext, iv } = await encryptElements(roomKey, elements);
-
   const nextDocData = {
+    id: roomId,
     sceneVersion,
-    ciphertext: firebase.firestore.Blob.fromUint8Array(
-      new Uint8Array(ciphertext),
-    ),
-    iv: firebase.firestore.Blob.fromUint8Array(iv),
+    ciphertext: uint8ArrayToBase64(new Uint8Array(ciphertext)),
+    iv: uint8ArrayToBase64(iv),
   } as FirebaseStoredScene;
 
-  const db = firebase.firestore();
-  const docRef = db.collection("scenes").doc(roomId);
-  const didUpdate = await db.runTransaction(async (transaction) => {
-    const doc = await transaction.get(docRef);
-    if (!doc.exists) {
-      transaction.set(docRef, nextDocData);
+  const store = getStore();
+  const runTransaction = async () => {
+    let doc;
+    let docExists = true;
+    try {
+      doc = await store.getRecord(roomId);
+    } catch (e) {
+      if (e.message && e.message.indexOf("404") > -1) {
+        docExists = false;
+      } else {
+        console.error(e);
+        return false;
+      }
+    }
+    if (!docExists) {
+      await store.createRecord(nextDocData);
       return true;
     }
 
-    const prevDocData = doc.data() as FirebaseStoredScene;
+    const prevDocData = doc.data as FirebaseStoredScene;
     if (prevDocData.sceneVersion >= nextDocData.sceneVersion) {
       return false;
     }
 
-    transaction.update(docRef, nextDocData);
+    await store.updateRecord(nextDocData);
     return true;
-  });
+  };
+  const didUpdate = await runTransaction();
 
   if (didUpdate) {
     firebaseSceneVersionCache.set(socket, sceneVersion);
@@ -150,18 +169,26 @@ export const loadFromFirebase = async (
   roomKey: string,
   socket: SocketIOClient.Socket | null,
 ): Promise<readonly ExcalidrawElement[] | null> => {
-  const firebase = await getFirebase();
-  const db = firebase.firestore();
-
-  const docRef = db.collection("scenes").doc(roomId);
-  const doc = await docRef.get();
-  if (!doc.exists) {
+  const store = getStore();
+  let doc;
+  let docExists = true;
+  try {
+    doc = await store.getRecord(roomId);
+  } catch (e) {
+    if (e.message && e.message.indexOf("404") > -1) {
+      docExists = false;
+    } else {
+      console.error(e);
+      return null;
+    }
+  }
+  if (!docExists) {
     return null;
   }
-  const storedScene = doc.data() as FirebaseStoredScene;
-  const ciphertext = storedScene.ciphertext.toUint8Array();
-  const iv = storedScene.iv.toUint8Array();
 
+  const storedScene = doc.data as FirebaseStoredScene;
+  const ciphertext = base64ToUint8Array(storedScene.ciphertext);
+  const iv = base64ToUint8Array(storedScene.iv);
   const elements = await decryptElements(roomKey, iv, ciphertext);
 
   if (socket) {
