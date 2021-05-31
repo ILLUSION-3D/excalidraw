@@ -93,6 +93,7 @@ export type AppState = {
   theme: "light" | "dark";
   gridSize: number | null;
   viewModeEnabled: boolean;
+  isSaved: boolean;
 
   /** top-most selected groups (i.e. does not include nested groups) */
   selectedGroupIds: { [groupId: string]: boolean };

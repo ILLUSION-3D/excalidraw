@@ -294,6 +294,7 @@ export type ExcalidrawImperativeAPI = {
   refresh: InstanceType<typeof App>["refresh"];
   importLibrary: InstanceType<typeof App>["importLibraryFromUrl"];
   setToastMessage: InstanceType<typeof App>["setToastMessage"];
+  setIsSaved: InstanceType<typeof App>["setIsSaved"];
   readyPromise: ResolvablePromise<ExcalidrawImperativeAPI>;
   ready: true;
   id: string;
@@ -344,6 +345,7 @@ class App extends React.Component<AppProps, AppState> {
       name,
       width: window.innerWidth,
       height: window.innerHeight,
+      isSaved: false,
     };
 
     this.id = nanoid();
@@ -368,6 +370,7 @@ class App extends React.Component<AppProps, AppState> {
         refresh: this.refresh,
         importLibrary: this.importLibraryFromUrl,
         setToastMessage: this.setToastMessage,
+        setIsSaved: this.setIsSaved,
         id: this.id,
       } as const;
       if (typeof excalidrawRef === "function") {
@@ -1441,6 +1444,10 @@ class App extends React.Component<AppProps, AppState> {
 
   setToastMessage = (toastMessage: string) => {
     this.setState({ toastMessage });
+  };
+
+  setIsSaved = (saved: boolean) => {
+    this.setState({ isSaved: saved });
   };
 
   restoreFileFromShare = async () => {

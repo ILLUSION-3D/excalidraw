@@ -319,21 +319,37 @@ const ExcalidrawWrapper = () => {
 
   const renderTopRightUI = useCallback(
     (isMobile: boolean, appState: AppState) => {
+      if (!collabAPI?.isCollaborating()) {
+        return <div></div>;
+      }
       return (
         <div
           style={{
             width: "24ch",
-            fontSize: "0.7em",
-            textAlign: "center",
+            fontSize: "1em",
+            textAlign: "right",
           }}
         >
+          {appState.isSaved ? (
+            <span
+              title="Saved"
+              style={{
+                fontSize: "1.4em",
+                color: "var(--icon-green-fill-color)",
+              }}
+            >
+              ✓
+            </span>
+          ) : (
+            "Saving..."
+          )}
           {/* <GitHubCorner theme={appState.theme} dir={document.dir} /> */}
           {/* FIXME remove after 2021-05-20 */}
           {/* {PlusLinkJSX} */}
         </div>
       );
     },
-    [],
+    [collabAPI],
   );
 
   const renderFooter = useCallback(

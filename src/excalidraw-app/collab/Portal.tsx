@@ -131,7 +131,11 @@ class Portal {
         broadcastPromise,
         this.collab.saveCollabRoomToFirebase(syncableElements),
       ]);
+      this.collab.excalidrawAPI.setIsSaved(true);
     } else {
+      if (this.collab.isCollaborating) {
+        this.collab.excalidrawAPI.setIsSaved(false);
+      }
       await broadcastPromise;
     }
   };
