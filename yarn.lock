@@ -7786,13 +7786,6 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   version "6.0.3"
   resolved "https://registry.npmjs.org/kind-of/-/kind-of-6.0.3.tgz"
 
-kinto-http@5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/kinto-http/-/kinto-http-5.2.0.tgz#fe69b4d1d6a963940bd3afadfbfcae2c349d3d23"
-  integrity sha512-bI2e++oQPEmRPscCMHikdmZeePI+auuH+QK16ozMk94BnVywpMAXX/2scbHZxCw5ogcMtqBnT9GWX3ElA4tLcw==
-  dependencies:
-    uuid "^8.0.0"
-
 kleur@^3.0.3:
   version "3.0.3"
   resolved "https://registry.npmjs.org/kleur/-/kleur-3.0.3.tgz"
@@ -12407,7 +12400,7 @@ uuid@^3.0.0, uuid@^3.3.2, uuid@^3.4.0:
   version "3.4.0"
   resolved "https://registry.npmjs.org/uuid/-/uuid-3.4.0.tgz"
 
-uuid@^8.0.0, uuid@^8.3.0:
+uuid@^8.3.0:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
 
