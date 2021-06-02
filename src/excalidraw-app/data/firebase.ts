@@ -4,9 +4,6 @@ import { ExcalidrawElement } from "../../element/types";
 import { getSceneVersion } from "../../element";
 import Portal from "../collab/Portal";
 import { restoreElements } from "../../data/restore";
-import KintoClient from "kinto-http";
-
-let kintoClient: typeof KintoClient | null = null;
 
 // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/btoa
 // https://github.com/MrPropre/base64-u8array-arraybuffer/blob/master/src/index.js
@@ -21,31 +18,54 @@ const uint8ArrayToBase64 = (typedArray: Uint8Array) => {
 const base64ToUint8Array = (b64: string) =>
   Uint8Array.from(atob(b64), (char: string) => char.charCodeAt(0));
 
-const loadClient = (): typeof KintoClient => {
-  const url = process.env.REACT_APP_STORE_BACKEND_URL;
-  const client = new KintoClient(url);
-  // @ts-ignore
-  return client;
-};
-
-const getClient = (): typeof KintoClient => {
-  if (!kintoClient) {
-    kintoClient = loadClient();
-  }
-  return kintoClient;
-};
-
-const getStore = () => {
-  const client = getClient();
-  // @ts-ignore
-  return client.bucket("whiteboard").collection("scenes");
-};
-
 interface FirebaseStoredScene {
   sceneVersion: number;
   iv: string; // base64
   ciphertext: string; // base64
 }
+
+const url = process.env.REACT_APP_STORE_BACKEND_URL;
+const store = {
+  get: async (id: string) => {
+    const response = await fetch(`${url}/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.status === 404) {
+      return null;
+    }
+    const json = await response.json();
+    return json.data;
+  },
+  create: async (id: string, doc: FirebaseStoredScene) => {
+    const whiteboard = { id, data: doc };
+    const response = await fetch(`${url}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(whiteboard),
+    });
+    return response.json();
+  },
+  update: async (id: string, doc: FirebaseStoredScene) => {
+    const whiteboard = { id, data: doc };
+    const response = await fetch(`${url}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(whiteboard),
+    });
+    return response.json();
+  },
+};
+
+const getStore = () => {
+  return store;
+};
 
 const encryptElements = async (
   key: string,
@@ -122,7 +142,6 @@ export const saveToFirebase = async (
   const sceneVersion = getSceneVersion(elements);
   const { ciphertext, iv } = await encryptElements(roomKey, elements);
   const nextDocData = {
-    id: roomId,
     sceneVersion,
     ciphertext: uint8ArrayToBase64(new Uint8Array(ciphertext)),
     iv: uint8ArrayToBase64(iv),
@@ -133,17 +152,14 @@ export const saveToFirebase = async (
     let doc;
     let docExists = true;
     try {
-      doc = await store.getRecord(roomId);
+      doc = await store.get(roomId);
+      docExists = !!doc;
     } catch (e) {
-      if (e.message && e.message.indexOf("404") > -1) {
-        docExists = false;
-      } else {
-        console.error(e);
-        return false;
-      }
+      console.error(e);
+      return false;
     }
     if (!docExists) {
-      await store.createRecord(nextDocData);
+      await store.create(roomId, nextDocData);
       return true;
     }
 
@@ -152,7 +168,7 @@ export const saveToFirebase = async (
       return false;
     }
 
-    await store.updateRecord(nextDocData);
+    await store.update(roomId, nextDocData);
     return true;
   };
   const didUpdate = await runTransaction();
@@ -173,14 +189,11 @@ export const loadFromFirebase = async (
   let doc;
   let docExists = true;
   try {
-    doc = await store.getRecord(roomId);
+    doc = await store.get(roomId);
+    docExists = !!doc;
   } catch (e) {
-    if (e.message && e.message.indexOf("404") > -1) {
-      docExists = false;
-    } else {
-      console.error(e);
-      return null;
-    }
+    console.error(e);
+    return null;
   }
   if (!docExists) {
     return null;
