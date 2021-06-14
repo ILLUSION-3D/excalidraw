@@ -164,7 +164,10 @@ export const saveToFirebase = async (
     }
 
     const prevDocData = doc.data as FirebaseStoredScene;
-    if (prevDocData.sceneVersion >= nextDocData.sceneVersion) {
+    if (
+      prevDocData !== null &&
+      prevDocData.sceneVersion >= nextDocData.sceneVersion
+    ) {
       return false;
     }
 
@@ -200,6 +203,9 @@ export const loadFromFirebase = async (
   }
 
   const storedScene = doc.data as FirebaseStoredScene;
+  if (storedScene === null) {
+    return null;
+  }
   const ciphertext = base64ToUint8Array(storedScene.ciphertext);
   const iv = base64ToUint8Array(storedScene.iv);
   const elements = await decryptElements(roomKey, iv, ciphertext);
