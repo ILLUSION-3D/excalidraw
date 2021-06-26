@@ -5,34 +5,7 @@ import { Dialog } from "./Dialog";
 import { getShortcutKey } from "../utils";
 import "./HelpDialog.scss";
 
-const Header = () => (
-  <div className="HelpDialog--header">
-    <a
-      className="HelpDialog--btn"
-      href="https://github.com/excalidraw/excalidraw#documentation"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {t("helpDialog.documentation")}
-    </a>
-    <a
-      className="HelpDialog--btn"
-      href="https://blog.excalidraw.com"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {t("helpDialog.blog")}
-    </a>
-    <a
-      className="HelpDialog--btn"
-      href="https://github.com/excalidraw/excalidraw/issues"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {t("helpDialog.github")}
-    </a>
-  </div>
-);
+const Header = () => <div className="HelpDialog--header"></div>;
 
 const Section = (props: { title: string; children: React.ReactNode }) => (
   <>
